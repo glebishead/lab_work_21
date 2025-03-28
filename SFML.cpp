@@ -1,4 +1,4 @@
-﻿#include <SFML/Graphics.hpp>
+#include <SFML/Graphics.hpp>
 #include <iostream>
 
 void reset_coords(sf::CircleShape& circle) {
@@ -8,33 +8,53 @@ void reset_coords(sf::CircleShape& circle) {
     circle.setPosition(sf::Vector2f(x0, y0));
 }
 
+void edit_text(sf::Text& some_text, sf::Font& font) {
+    some_text.setFont(font);
+    some_text.setCharacterSize(24);
+    some_text.setStyle(sf::Text::Bold);
+    
+}
+
 int main()
 {
     long long misses;
     long score;
+    double precision;
     score = 0;
     misses = 0;
+    precision = 100;
+
     std::string score_str = std::to_string(score);
-    std::string misses_str = std::to_string(misses);
+    std::string precision_str = std::to_string(precision);
 
     sf::Font font;
     if (!font.loadFromFile("ALGER.ttf"))
     {
         // error
     }
-    sf::Text text;
-    text.setFont(font);
-    text.setString(score_str);
-    text.setCharacterSize(24);
-    text.setStyle(sf::Text::Bold);
-    text.setPosition(sf::Vector2f(20, 20));
 
-    sf::Text text1;
-    text1.setFont(font);
-    text1.setString(misses_str);
-    text1.setCharacterSize(24);
-    text1.setStyle(sf::Text::Bold);
-    text1.setPosition(sf::Vector2f(20, 60));
+    sf::Text score_text;
+    edit_text(score_text, font);
+    score_text.setString(score_str);
+    score_text.setPosition(sf::Vector2f(130, 20));
+    
+
+    sf::Text precision_text;
+    precision_text.setString(precision_str);
+    edit_text(precision_text, font);
+    precision_text.setPosition(sf::Vector2f(160, 60));
+
+    sf::Text strikes_message_text;
+    std::string strikes_str = "Points:";
+    strikes_message_text.setString(strikes_str);
+    edit_text(strikes_message_text, font);
+    strikes_message_text.setPosition(sf::Vector2f(20, 20));
+
+    sf::Text precision_message_text;
+    std::string precision_message_str = "Precision:";
+    precision_message_text.setString(precision_message_str);
+    edit_text(precision_message_text, font);
+    precision_message_text.setPosition(sf::Vector2f(20, 60));
 
     sf::RenderWindow window(sf::VideoMode(600, 600), "aim trainer");
 
@@ -50,11 +70,6 @@ int main()
             if (event.type == sf::Event::Closed)
                 window.close();
             if (event.type == sf::Event::KeyPressed || event.type == sf::Event::MouseButtonPressed) {
-
-                misses += 1;
-                std::string misses_str = std::to_string(misses);
-                text1.setString(misses_str);
-
                 sf::Vector2i mouse_position = sf::Mouse::getPosition(window);
                 double mouse_x = mouse_position.x;
                 double mouse_y = mouse_position.y;
@@ -70,18 +85,25 @@ int main()
                 if ((circle_x < mouse_x && mouse_x < (circle_x + 2 * circle.getRadius()) &&
                     (circle_y < mouse_y && mouse_y < (circle_y + 2 * circle.getRadius())))) {
                     score += 1;
-                    std::string score_str = std::to_string(score);
-                    text.setString(score_str);
+                    score_str = std::to_string(score);
+                    score_text.setString(score_str);
                     reset_coords(circle);
                 }
-
+                else {
+                    misses += 1;
+                }
+                precision = round((1.0 * score) / (score + misses) * 100 * 100) / 100;
+                precision_str = std::to_string(precision);
+                precision_text.setString(precision_str);
             }
         }
 
         window.clear();
         window.draw(circle);
-        window.draw(text);
-        window.draw(text1);
+        window.draw(precision_text);
+        window.draw(score_text);
+        window.draw(strikes_message_text);
+        window.draw(precision_message_text);
         window.display();
     }
 
